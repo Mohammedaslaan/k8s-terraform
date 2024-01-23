@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: logindeploy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: loginwebapp
+  template:
+    metadata:
+      labels:
+        app: loginwebapp
+    spec:
+      containers:
+      - name: loginweb-container
+        image: mohammedaslaan/loginwebapp
+        ports:
+        - containerPort: 8080

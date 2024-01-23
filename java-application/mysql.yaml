@@ -1,0 +1,67 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mysql
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      containers:
+      - name: mysql
+        image: mysql:latest
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          value: admin123
+        - name: MYSQL_DATABASE
+          value: sample
+        - name: MYSQL_USER
+          value: admin
+        - name: MYSQL_PASSWORD
+          value: admin123
+        ports:
+        - containerPort: 3306
+        volumeMounts:
+        - name: mysql-initdb
+          mountPath: /docker-entrypoint-initdb.d
+      volumes:
+      - name: mysql-initdb
+        configMap:
+          name: mysql-initdb-configmap
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mysql-initdb-configmap
+data:
+  database.sql: |
+    DROP DATABASE IF EXISTS sample;
+    CREATE DATABASE sample;
+    USE sample;
+    CREATE TABLE IF NOT EXISTS USER (
+    firstname VARCHAR(50),
+    lastname VARCHAR(50),
+    email VARCHAR(100) PRIMARY KEY,
+    username VARCHAR(50) NOT NULL,
+    password VARCHAR(50) NOT NULL,
+    REGDATE DATE
+    );
+    insert into USER (firstname, lastname, email, username, password, regdate) values ('aslaan', 'aslaan', 'aslaan@gmail.com', 'aslaan', 'aslaan',"1-1-24");
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql-service
+spec:
+  selector:
+    app: mysql
+  ports:
+    - protocol: TCP
+      port: 3306
+      targetPort: 3306
